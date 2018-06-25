@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -18,7 +19,7 @@ public class Field extends View {
     float cursorX = 0;
     float cursorY = 0;
     int WIDTH, HEIGHT;
-    float day = 0;
+    float day;
     float segmentX, segmentY;
     private Paint marker;
     Entity[][] mass;
@@ -54,6 +55,7 @@ public class Field extends View {
         button();
         if (cursorX >= 0 && cursorX <= canvas.getWidth() &&
                 cursorY >= (int) (segmentY * (Y - 1)) && cursorY <= canvas.getHeight()) {
+            day = 0;
             fillMass();
             initialState();
             button();
@@ -64,10 +66,11 @@ public class Field extends View {
         int vector;
         int nextDay;
         day++;
+        Log.v("Day ", String.valueOf(day));
         canvas.drawColor(Color.WHITE);
         for (int i = 0; i < X; i++) {
             for (int j = 0; j < Y; j++) {
-                vector = (int) (Math.random() * 3);
+                vector = (int) (Math.random() * 5);
                 switch (vector) {
                     case (0):
                         toLeftPenguin(i, j);
@@ -75,85 +78,116 @@ public class Field extends View {
                         toLeftUpPenguin(i, j);
                     case (2):
                         toUpPenguin(i, j);
-                    //case (3):
-                    //    toRightPenguin(i, j);
+                    case (3):
+                      toRightUpPenguin(i,j);
+                    case (4):
+                        toRightPenguin(i, j);
                 }
             }
             createField();
         }
     }
 
-    private void toRightPenguin(int i, int j) {
-        if (isPenguin(mass[i][j]) &&
-                mass[i][j].getToday()<day) {
-            if (rightElementExist(i)) {
-                if (ElementIsEmpty(mass[i + 1][j])) {
-                    mass[i + 1][j] = new Penguin(mass[i][j].getLifetime() + 1, day);
-                    canvas.drawBitmap(tux, (i + 1) * segmentX, (j) * segmentY, marker);
-                    mass[i][j] = new Entity();
+    private void toRightUpPenguin(int i, int j) {
+        if (isPenguin(mass[i][j])) {
+            if (mass[i][j].getToday() < day) {
+                if (upRightElementExist(i,j)) {
+                    if (ElementIsEmpty(mass[i + 1][j - 1])) {
+                        mass[i + 1][j - 1] = new Penguin(mass[i][j].getLifetime() + 1, day);
+                        canvas.drawBitmap(tux, (i + 1) * segmentX, (j - 1) * segmentY, marker);
+                        mass[i][j] = new Entity();
+                    } else {
+                        mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
+                        mass[i][j].setToday(day);
+                        canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
+                    }
                 } else {
                     mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
                     mass[i][j].setToday(day);
                     canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
                 }
-            } else {
-                mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
-                mass[i][j].setToday(day);
-                canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
+            }
+        }
+    }
+
+    private void toRightPenguin(int i, int j) {
+        if (isPenguin(mass[i][j])) {
+            Log.v("Today", String.valueOf(mass[i][j].getToday()));
+            if (mass[i][j].getToday() < day) {
+                if (rightElementExist(i)) {
+                    if (ElementIsEmpty(mass[i + 1][j])) {
+                        mass[i + 1][j] = new Penguin(mass[i][j].getLifetime() + 1, day + 1);
+                        Log.v("NEW Today", String.valueOf(mass[i][j].getToday()+1));
+                        canvas.drawBitmap(tux, (i + 1) * segmentX, (j) * segmentY, marker);
+                        mass[i][j] = new Entity();
+                        Log.v(String.valueOf(i), String.valueOf(i+1));
+                    } else {
+                        mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
+                        mass[i][j].setToday(day);
+                        canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
+                    }
+                } else {
+                    mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
+                    mass[i][j].setToday(day);
+                    canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
+                }
             }
         }
     }
 
     private void toLeftUpPenguin(int i, int j) {
-        if (isPenguin(mass[i][j]) &&
-                mass[i][j].getToday() < day) {
-            if (upLeftElementExist(i, j)) {
-                if (ElementIsEmpty(mass[i - 1][j - 1])) {
-                    mass[i - 1][j - 1] = new Penguin(mass[i][j].getLifetime() + 1, day);
-                    canvas.drawBitmap(tux, (i - 1) * segmentX, (j - 1) * segmentY, marker);
-                    mass[i][j] = new Entity();
+        if (isPenguin(mass[i][j])) {
+            if (mass[i][j].getToday() < day) {
+                if (upLeftElementExist(i, j)) {
+                    if (ElementIsEmpty(mass[i - 1][j - 1])) {
+                        mass[i - 1][j - 1] = new Penguin(mass[i][j].getLifetime() + 1, day);
+                        canvas.drawBitmap(tux, (i - 1) * segmentX, (j - 1) * segmentY, marker);
+                        mass[i][j] = new Entity();
+                    } else {
+                        mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
+                        mass[i][j].setToday(day);
+                        canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
+                    }
                 } else {
                     mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
                     mass[i][j].setToday(day);
                     canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
                 }
-            } else {
-                mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
-                mass[i][j].setToday(day);
-                canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
             }
         }
     }
 
     private void toUpPenguin(int i, int j) {
-        if (isPenguin(mass[i][j]) &&
-                mass[i][j].getToday() < day) {
-            if (upElementExist(j)) {
-                if (ElementIsEmpty(mass[i][j - 1])) {
-                    mass[i][j - 1] = new Penguin(mass[i][j].getLifetime() + 1, day);
-                    canvas.drawBitmap(tux, (i) * segmentX, (j - 1) * segmentY, marker);
-                    mass[i][j] = new Entity();
+        if (isPenguin(mass[i][j])) {
+            if (mass[i][j].getToday() < day) {
+                if (upElementExist(j)) {
+                    if (ElementIsEmpty(mass[i][j - 1])) {
+                        mass[i][j - 1] = new Penguin(mass[i][j].getLifetime() + 1, day);
+                        canvas.drawBitmap(tux, (i) * segmentX, (j - 1) * segmentY, marker);
+                        mass[i][j] = new Entity();
+                    } else {
+                        mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
+                        mass[i][j].setToday(day);
+                        canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
+                    }
                 } else {
                     mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
                     mass[i][j].setToday(day);
                     canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
                 }
-            } else {
-                mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
-                mass[i][j].setToday(day);
-                canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
             }
         }
     }
 
     private void toLeftPenguin(int i, int j) {
-        if (isPenguin(mass[i][j]) &&
-                mass[i][j].getToday() < day) {
+        if (isPenguin(mass[i][j])) {
+                if (mass[i][j].getToday() < day) {
             if (leftElementExist(i)) {
                 if (ElementIsEmpty(mass[i - 1][j])) {
                     mass[i - 1][j] = new Penguin(mass[i][j].getLifetime() + 1, day);
                     canvas.drawBitmap(tux, (i - 1) * segmentX, (j) * segmentY, marker);
                     mass[i][j] = new Entity();
+                    Log.v(String.valueOf(i), String.valueOf(i-1));
                 } else {
                     mass[i][j].setLifetime(mass[i][j].getLifetime() + 1);
                     mass[i][j].setToday(day);
@@ -165,10 +199,15 @@ public class Field extends View {
                 canvas.drawBitmap(tux, (i) * segmentX, (j) * segmentY, marker);
             }
         }
+        }
     }
 
     private boolean upLeftElementExist(int i, int j) {
         if (i > 0 && j > 0) return true;
+        return false;
+    }
+    private boolean upRightElementExist(int i, int j) {
+        if (i < X - 1 && j > 0) return true;
         return false;
     }
 
